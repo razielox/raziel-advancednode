@@ -8,8 +8,6 @@ const passport = require('passport')
 const {ObjectID} = require('mongodb')
 
 const app = express();
-
-
 fccTesting(app); //For FCC testing purposes
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -24,18 +22,26 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-passport.serializeUser((user, done) => {
-  done(null, user._id)
-})
 
-passport.deserializeUser((id, done) => {
-  //myDB.findOne({_id: new ObjectID(id)}, (err, doc) => {done(null,null)})
-  done(null,null)
+myDB(async client => {
+  const myDataBase = await client
+  app.route('/').get((req, res) => {
+    res.render('index',{title: 'Hello', message: 'Please log in'})
+  });
+  passport.serializeUser((user, done) => {
+    done(null, user._id)
+  })
+  
+  passport.deserializeUser((id, done) => {
+    myDataBase.findOne({_id: new ObjectID(id)}, (err, doc) => {
+      done(null,doc)})
+  })
+  
+}).catch(err => {
+  app.route('/').get((request, response) => {
+    response.render('index', {title: err, message: 'unable to connect to database'})
+  })
 })
-app.route('/').get((req, res) => {
-res.render('index',{title: 'Hello', message: 'Please log in'})
-});
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
