@@ -36,9 +36,19 @@ myDB(async client => {
     })
   }))
   
+  app.route('/login').post((request, response) => {
+    passport.authenticate('local',{failureRedirect: '/'})
+    
+    response.redirect('/profile')
+  })
+
+  app.route('/profile').get((request, response) => {
+    console.log(request.user)
+    response.render('profile')
+  })
 
   app.route('/').get((req, res) => {
-    res.render('index',{title: 'Connected to Database', message: 'Please log in'})
+    res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true})
   });
   passport.serializeUser((user, done) => {
     done(null, user._id)
