@@ -6,7 +6,7 @@ const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const session = require('express-session')
 const passport = require('passport')
 const {ObjectID} = require('mongodb')
-
+const LocalStrategy = require('passport-local')
 const app = express();
 fccTesting(app); //For FCC testing purposes
 app.use(session({
@@ -26,6 +26,15 @@ app.use(express.urlencoded({ extended: true }));
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
   
+  passport.use(new LocalStrategy((username, password, done)=> {
+    myDataBase.findOne({username: username}, (err, user) => {
+      console.log(`User ${username} attemped to log in`)
+      if(err) return done(err)
+      if(password) return done(null, user)
+      if(password !== user.password) return done(null, false)
+      return done(null, user)
+    })
+  }))
   
 
   app.route('/').get((req, res) => {
