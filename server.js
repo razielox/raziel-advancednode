@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 myDB(async client => {
-  const myDataBase = await client
+  const myDataBase = await client.db('database').collection('users')
   app.route('/').get((req, res) => {
     res.render('index',{title: 'Hello', message: 'Please log in'})
   });
