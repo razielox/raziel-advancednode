@@ -59,7 +59,30 @@ myDB(async client => {
   app.route('/profile').get(ensureAuthenticated,(request, response) => {
     
     console.log(request.user)
-    response.render('profile',{username: req.user.username})
+    response.render('profile',{username: request.user.username})
+  })
+
+  app.route('/register').post((request, response, next) => {
+    myDataBase.findOne({username: request.body.username}, (err, user) => {
+      if(err) {
+        next(err)
+      } else if(user) {
+        response.redirect('/')
+      } else {
+        myDataBase.insertOne({
+          username: request.body.username,
+          password: request.body.password
+        }, (err, doc) => {
+          if(err) {
+            response.redirect('/')
+          } else {
+            next(null, doc.ops[0])
+          }
+        })
+      }
+    })
+  }, passport.authenticate('local',{failureRedirect:'/'}),(request,response, next) =>{
+    response.redirect('/profile')
   })
 
   app.route('/logout').get((req,res) => {
@@ -70,7 +93,7 @@ myDB(async client => {
   })
 
   app.route('/').get((req, res) => {
-    res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true})
+    res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true, showRegistration: true})
   });
   passport.serializeUser((user, done) => {
     done(null, user._id)
