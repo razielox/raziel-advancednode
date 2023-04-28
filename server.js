@@ -36,9 +36,10 @@ myDB(async client => {
   passport.use(new LocalStrategy((username, password, done)=> {
     myDataBase.findOne({username: username}, (err, user) => {
       console.log(`User ${username} attemped to log in`)
+      console.log(bcrypt.compareSync(password, user.password))
       if(err) return done(err)
-      if(password) return done(null, user)
-      if(!bcrypt.compare(passport, user.password)) return done(null, false)
+      //if(password) return done(null, user)
+      if(!bcrypt.compareSync(password, user.password)) return done(null, false)
       return done(null, user)
     })
   }))
