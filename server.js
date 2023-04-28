@@ -36,8 +36,8 @@ myDB(async client => {
     })
   }))
   
-  app.route('/login').post((request, response, next) => {
-    passport.authenticate('local',{failureRedirect: '/'}, (err, user, info) => {
+  app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(request, response) => {
+    /* passport.authenticate('local',{failureRedirect: '/'}, (err, user, info) => {
       console.log(user)
       if(err) return next(err)
       if(!user) return response.redirect('/')
@@ -47,8 +47,9 @@ myDB(async client => {
         }
         return response.redirect('/profile')
       })
-    })(request, response, next) 
-    //response.redirect('/profile')
+    })(request, response, next)  */
+    //console.log(request.user, next)
+    response.redirect('/profile')
   })
 
   app.route('/profile').get((request, response) => {
