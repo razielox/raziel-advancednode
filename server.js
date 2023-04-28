@@ -59,7 +59,7 @@ myDB(async client => {
   app.route('/profile').get(ensureAuthenticated,(request, response) => {
     
     console.log(request.user)
-    response.render('profile')
+    response.render('profile',{username: req.user.username})
   })
 
   app.route('/').get((req, res) => {
