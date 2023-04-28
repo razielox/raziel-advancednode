@@ -7,14 +7,17 @@ const session = require('express-session')
 const passport = require('passport')
 const {ObjectID} = require('mongodb')
 const LocalStrategy = require('passport-local')
+const bcrypt = require('bcrypt')
 const app = express();
 fccTesting(app); //For FCC testing purposes
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
   cookie:{secure:false}
 }))
+
 app.set('view engine', 'pug')
 app.set('views', './views/pug')
 app.use('/public', express.static(process.cwd() + '/public'));
@@ -35,7 +38,7 @@ myDB(async client => {
       console.log(`User ${username} attemped to log in`)
       if(err) return done(err)
       if(password) return done(null, user)
-      if(password !== user.password) return done(null, false)
+      if(!bcrypt.compare(passport, user.password)) return done(null, false)
       return done(null, user)
     })
   }))
@@ -69,9 +72,10 @@ myDB(async client => {
       } else if(user) {
         res.redirect('/')
       } else {
+        const password = bcrypt.hashSync(req.body.password, 12)
         myDataBase.insertOne({
           username: req.body.username,
-          password: req.body.password
+          password: password
         }, (err, doc) => {
           if(err) {
             res.redirect('/')
