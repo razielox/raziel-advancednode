@@ -62,6 +62,11 @@ myDB(async client => {
     response.render('profile',{username: req.user.username})
   })
 
+  app.route('/logout').get((request,response) => {
+    request.logout()
+    response.redirect('/')
+  })
+
   app.route('/').get((req, res) => {
     res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true})
   });
@@ -74,6 +79,9 @@ myDB(async client => {
       done(null,doc)})
   })
   
+  app.use((request, response,next) => {
+    response.status(404).type('text').send('Not Found')
+  })
 }).catch(err => {
   app.route('/').get((request, response) => {
     response.render('index', {title: err, message: 'unable to connect to database'})
