@@ -62,27 +62,27 @@ myDB(async client => {
     response.render('profile',{username: request.user.username})
   })
 
-  app.route('/register').post((request, response, next) => {
-    myDataBase.findOne({username: request.body.username}, (err, user) => {
+  app.route('/register').post((req, res, next) => {
+    myDataBase.findOne({username: req.body.username}, (err, user) => {
       if(err) {
         next(err)
       } else if(user) {
-        response.redirect('/')
+        res.redirect('/')
       } else {
         myDataBase.insertOne({
-          username: request.body.username,
-          password: request.body.password
+          username: req.body.username,
+          password: req.body.password
         }, (err, doc) => {
           if(err) {
-            response.redirect('/')
+            res.redirect('/')
           } else {
             next(null, doc.ops[0])
           }
         })
       }
     })
-  }, passport.authenticate('local',{failureRedirect:'/'}),(request,response, next) =>{
-    response.redirect('/profile')
+  }, passport.authenticate('local',{failureRedirect:'/'}),(req,res, next) =>{
+    res.redirect('/profile')
   })
 
   app.route('/logout').get((req,res) => {
