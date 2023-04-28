@@ -62,9 +62,11 @@ myDB(async client => {
     response.render('profile',{username: req.user.username})
   })
 
-  app.route('/logout').get((request,response) => {
-    request.logout()
-    response.redirect('/')
+  app.route('/logout').get((req,res) => {
+    
+    req.logout()
+    
+    res.redirect('/')
   })
 
   app.route('/').get((req, res) => {
