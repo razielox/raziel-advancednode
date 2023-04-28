@@ -23,6 +23,10 @@ app.use(passport.session())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const ensureAuthenticated = (req,res,next) => {
+  if(req.isAuthenticated()) return next()
+  res.redirect('/')
+}
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
   
@@ -52,7 +56,8 @@ myDB(async client => {
     response.redirect('/profile')
   })
 
-  app.route('/profile').get((request, response) => {
+  app.route('/profile').get(ensureAuthenticated,(request, response) => {
+    
     console.log(request.user)
     response.render('profile')
   })
