@@ -1,0 +1,64 @@
+const passport = require('passport')
+//const ensureAuthenticated = require('./auth')
+module.exports = (app, myDataBase) => {
+    const ensureAuthenticated = (req,res,next) => {
+        if(req.isAuthenticated()) return next()
+        res.redirect('/')
+      }
+    app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(request, response) => {
+        /* passport.authenticate('local',{failureRedirect: '/'}, (err, user, info) => {
+          console.log(user)
+          if(err) return next(err)
+          if(!user) return response.redirect('/')
+          request.logIn(user, (err) => {
+            if(err) {
+              return next(err)
+            }
+            return response.redirect('/profile')
+          })
+        })(request, response, next)  */
+        //console.log(request.user, next)
+        response.redirect('/profile')
+      })
+    
+      app.route('/profile').get(ensureAuthenticated,(request, response) => {
+        
+        console.log(request.user)
+        response.render('profile',{username: request.user.username})
+      })
+    
+      app.route('/register').post((req, res, next) => {
+        myDataBase.findOne({username: req.body.username}, (err, user) => {
+          if(err) {
+            next(err)
+          } else if(user) {
+            res.redirect('/')
+          } else {
+            const password = bcrypt.hashSync(req.body.password, 12)
+            myDataBase.insertOne({
+              username: req.body.username,
+              password: password
+            }, (err, doc) => {
+              if(err) {
+                res.redirect('/')
+              } else {
+                next(null, doc.ops[0])
+              }
+            })
+          }
+        })
+      }, passport.authenticate('local',{failureRedirect:'/'}),(req,res, next) =>{
+        res.redirect('/profile')
+      })
+    
+      app.route('/logout').get((req,res) => {
+        
+        req.logout()
+        
+        res.redirect('/')
+      })
+    
+      app.route('/').get((req, res) => {
+        res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true, showRegistration: true})
+      });
+}
