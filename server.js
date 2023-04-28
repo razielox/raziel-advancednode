@@ -36,10 +36,19 @@ myDB(async client => {
     })
   }))
   
-  app.route('/login').post((request, response) => {
-    passport.authenticate('local',{failureRedirect: '/'})
-    
-    response.redirect('/profile')
+  app.route('/login').post((request, response, next) => {
+    passport.authenticate('local',{failureRedirect: '/'}, (err, user, info) => {
+      console.log(user)
+      if(err) return next(err)
+      if(!user) return response.redirect('/')
+      request.logIn(user, (err) => {
+        if(err) {
+          return next(err)
+        }
+        return response.redirect('/profile')
+      })
+    })(request, response, next) 
+    //response.redirect('/profile')
   })
 
   app.route('/profile').get((request, response) => {
