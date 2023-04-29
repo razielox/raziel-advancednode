@@ -1,64 +1,80 @@
 const passport = require('passport')
+const passportgithub = require('passport-github')
 //const ensureAuthenticated = require('./auth')
+
 module.exports = (app, myDataBase) => {
-    const ensureAuthenticated = (req,res,next) => {
-        if(req.isAuthenticated()) return next()
+  passport.use(new passportgithub({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: "http://localhost:8080/auth/github/callback"
+  },
+    (accessToken, refreshToken, profile, cb) => {
+      //console.log(profile)
+      myDataBase.findOne({githubId: profile.id}, (err, user) => {
+        if(user) {
+          return cb(err,user)
+        } else {
+          myDataBase.insertOne({githubId: profile.id, username: profile.username, provider: profile.provider})
+
+          return cb(err,user)
+        }
+      })
+    } ))
+const ensureAuthenticated = (req,res,next) => {
+    if(req.isAuthenticated()) return next()
+    res.redirect('/')
+  }
+app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(request, response) => {
+    
+    response.redirect('/profile')
+  })
+
+  app.route('/profile').get(ensureAuthenticated,(request, response) => {
+    
+    console.log(request.user)
+    response.render('profile',{username: request.user.username})
+  })
+
+  app.route('/register').post((req, res, next) => {
+    myDataBase.findOne({username: req.body.username}, (err, user) => {
+      if(err) {
+        next(err)
+      } else if(user) {
         res.redirect('/')
-      }
-    app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(request, response) => {
-        /* passport.authenticate('local',{failureRedirect: '/'}, (err, user, info) => {
-          console.log(user)
-          if(err) return next(err)
-          if(!user) return response.redirect('/')
-          request.logIn(user, (err) => {
-            if(err) {
-              return next(err)
-            }
-            return response.redirect('/profile')
-          })
-        })(request, response, next)  */
-        //console.log(request.user, next)
-        response.redirect('/profile')
-      })
-    
-      app.route('/profile').get(ensureAuthenticated,(request, response) => {
-        
-        console.log(request.user)
-        response.render('profile',{username: request.user.username})
-      })
-    
-      app.route('/register').post((req, res, next) => {
-        myDataBase.findOne({username: req.body.username}, (err, user) => {
+      } else {
+        const password = bcrypt.hashSync(req.body.password, 12)
+        myDataBase.insertOne({
+          username: req.body.username,
+          password: password
+        }, (err, doc) => {
           if(err) {
-            next(err)
-          } else if(user) {
             res.redirect('/')
           } else {
-            const password = bcrypt.hashSync(req.body.password, 12)
-            myDataBase.insertOne({
-              username: req.body.username,
-              password: password
-            }, (err, doc) => {
-              if(err) {
-                res.redirect('/')
-              } else {
-                next(null, doc.ops[0])
-              }
-            })
+            next(null, doc.ops[0])
           }
         })
-      }, passport.authenticate('local',{failureRedirect:'/'}),(req,res, next) =>{
-        res.redirect('/profile')
-      })
+      }
+    })
+  }, passport.authenticate('local',{failureRedirect:'/'}),(req,res, next) =>{
+    res.redirect('/profile')
+  })
+
+  app.route('/logout').get((req,res) => {
     
-      app.route('/logout').get((req,res) => {
-        
-        req.logout()
-        
-        res.redirect('/')
-      })
+    req.logout()
     
-      app.route('/').get((req, res) => {
-        res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true, showRegistration: true})
-      });
+    res.redirect('/')
+  })
+  
+  app.route('/auth/github').get(passport.authenticate('github'),(req, res, next) => {
+    
+  })
+
+  app.route('/auth/github/callback').get(passport.authenticate('github',{failureRedirect:'/'}),(req, res, next) => {
+    res.redirect('/profile')
+  })
+    
+  app.route('/').get((req, res) => {
+    res.render('index',{title: 'Connected to Database', message: 'Please log in', showLogin: true, showRegistration: true, showSocialAuth: true})
+  });
 }
