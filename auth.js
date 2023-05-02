@@ -23,12 +23,26 @@ module.exports = async(app, myDataBase) => {
   },
     (accessToken, refreshToken, profile, cb) => {
       console.log(profile)
-      myDataBase.findOne({githubId: profile.id}, (err, user) => {
+      myDataBase.findOne({_id: profile.id}, (err, user) => {
         if(user) {
           return cb(err,user)
         } else {
-          myDataBase.insertOne({githubId: profile.id, username: profile.username, provider: profile.provider})
+          myDataBase.insertOne({ $setOnInsert:{
 
+            _id: profile.id, 
+            username: profile.username,
+            name:profile.name,
+            photo:profile.photo,
+            email: Array.isArray(profile.emails) ? profile.emails[0].value : 'No public email',
+            created_on: new Date(),
+            provider: profile.provider || ''},
+            $set: {
+              last_login: new Date(),
+            }, $inc: {
+              login_count:1
+            },
+           },{upsert: true, new: true})
+          
           return cb(err,user)
         }
       })

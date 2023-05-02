@@ -8,6 +8,8 @@ const passport = require('passport')
 const app = express();
 const routes = require('./routes')
 const auth = require('./auth')
+require('https').globalAgent.options.rejectUnauthorized = false;
+
 fccTesting(app); //For FCC testing purposes
 
 app.use(session({
