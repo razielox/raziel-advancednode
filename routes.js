@@ -19,6 +19,7 @@ app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(
   })
 
   app.route('/register').post((req, res, next) => {
+    console.log(req)
     myDataBase.findOne({username: req.body.username}, (err, user) => {
       if(err) {
         next(err)
