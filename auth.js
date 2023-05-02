@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcrypt')
 const {ObjectID} = require('mongodb')
-const GitHubStrategy = require('passport-github')
+const GitHubStrategy = require('passport-github').Strategy
 
 
 module.exports = async(app, myDataBase) => {
