@@ -51,11 +51,9 @@ app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(
     res.redirect('/')
   })
   
-  app.route('/auth/github').get(passport.authenticate('github'),(req, res, next) => {
-    
-  })
+  app.route('/auth/github').get(passport.authenticate('github'))
 
-  app.route('/auth/github/callback').get(passport.authenticate('github',{failureRedirect:'/'}),(req, res, next) => {
+  app.route('/auth/github/callback').get(passport.authenticate('github',{failureRedirect:'/'}),(req, res) => {
     res.redirect('/profile')
   })
     
