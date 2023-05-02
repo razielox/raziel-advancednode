@@ -19,7 +19,7 @@ module.exports = async(app, myDataBase) => {
   passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: 'http://localhost:8080/auth/github/callback'
+    callbackURL: 'http://127.0.0.1:8080/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
       console.log(profile)
