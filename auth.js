@@ -19,29 +19,22 @@ module.exports = async(app, myDataBase) => {
   passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
+    callbackURL: 'http://localhost:8080/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
       console.log(profile)
-      myDataBase.findOne({_id: profile.id}, (err, user) => {
+      myDataBase.findOne({id: profile.id}, (err, user) => {
         if(user) {
           return cb(err,user)
         } else {
-          myDataBase.insertOne({ $setOnInsert:{
-
-            _id: profile.id, 
+          myDataBase.insertOne({
+            id: profile.id, 
             username: profile.username,
             name:profile.name,
             photo:profile.photo,
             email: Array.isArray(profile.emails) ? profile.emails[0].value : 'No public email',
             created_on: new Date(),
-            provider: profile.provider || ''},
-            $set: {
-              last_login: new Date(),
-            }, $inc: {
-              login_count:1
-            },
-           },{upsert: true, new: true})
+            provider: profile.provider || ''})
           
           return cb(err,user)
         }
