@@ -1,4 +1,5 @@
 const passport = require('passport')
+const bcrypt = require('bcrypt')
 //const ensureAuthenticated = require('./auth')
 
 module.exports = (app, myDataBase) => {
