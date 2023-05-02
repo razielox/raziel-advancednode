@@ -6,10 +6,20 @@ const GitHubStrategy = require('passport-github').Strategy
 
 
 module.exports = async(app, myDataBase) => {
+  
+  passport.serializeUser((user, done) => {
+    done(null, user._id)
+  })
+  
+  passport.deserializeUser((id, done) => {
+    myDataBase.findOne({_id: new ObjectID(id)}, (err, doc) => {
+      done(null,doc)})
+  })
+  
   passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "https://raziel-advancednode-production.up.railway.app/auth/github/callback"
+    callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
       //console.log(profile)
@@ -34,13 +44,4 @@ module.exports = async(app, myDataBase) => {
           return done(null, user)
         })
       }))
-
-      passport.serializeUser((user, done) => {
-        done(null, user._id)
-      })
-      
-      passport.deserializeUser((id, done) => {
-        myDataBase.findOne({_id: new ObjectID(id)}, (err, doc) => {
-          done(null,doc)})
-      })
 }
