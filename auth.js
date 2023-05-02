@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcrypt')
 const {ObjectID} = require('mongodb')
-const GitHubStrategy = require('passport-github').Strategy
+const GitHubStrategy = require('passport-github')
 
 
 module.exports = async(app, myDataBase) => {
@@ -22,7 +22,7 @@ module.exports = async(app, myDataBase) => {
     callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
-      //console.log(profile)
+      console.log(profile)
       myDataBase.findOne({githubId: profile.id}, (err, user) => {
         if(user) {
           return cb(err,user)
