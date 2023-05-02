@@ -15,12 +15,12 @@ app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(
 
   app.route('/profile').get(ensureAuthenticated,(request, response) => {
     
-    //console.log(request.user)
+    console.log(request.user)
     response.render('profile',{username: request.user.username})
   })
 
   app.route('/register').post((req, res, next) => {
-    console.log(req)
+    //console.log(req)
     myDataBase.findOne({username: req.body.username}, (err, user) => {
       if(err) {
         next(err)
