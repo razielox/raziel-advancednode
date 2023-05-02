@@ -27,7 +27,7 @@ module.exports = async(app, myDataBase) => {
         myDataBase.findOne({username: username}, (err, user) => {
           console.log(`User ${username} attemped to log in`)
           console.log(err, user)
-          if(err) return done(null, false)
+          if(!user) return done(null, false)
           //if(password) return done(null, user)
           if(!bcrypt.compareSync(password, user.password)) return done(null, false)
           console.log(bcrypt.compareSync(password, user.password))
