@@ -1,25 +1,8 @@
 const passport = require('passport')
-const passportgithub = require('passport-github')
 //const ensureAuthenticated = require('./auth')
 
 module.exports = (app, myDataBase) => {
-  passport.use(new passportgithub({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "http://localhost:8080/auth/github/callback"
-  },
-    (accessToken, refreshToken, profile, cb) => {
-      //console.log(profile)
-      myDataBase.findOne({githubId: profile.id}, (err, user) => {
-        if(user) {
-          return cb(err,user)
-        } else {
-          myDataBase.insertOne({githubId: profile.id, username: profile.username, provider: profile.provider})
-
-          return cb(err,user)
-        }
-      })
-    } ))
+  
 const ensureAuthenticated = (req,res,next) => {
     if(req.isAuthenticated()) return next()
     res.redirect('/')
