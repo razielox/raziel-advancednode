@@ -10,23 +10,30 @@ const routes = require('./routes')
 const auth = require('./auth')
 const http = require('http').createServer(app)
 const io = require('socket.io')(http)
-
+const MongoStore = require('connect-mongo')(session)
+const URI = process.env.MONGO_URI
+const store = new MongoStore({url: URI})
 fccTesting(app); //For FCC testing purposes
+
+app.set('view engine', 'pug')
+app.set('views', './views/pug')
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
-  cookie:{secure:false}
+  cookie:{secure:false},
+  key: 'express.sid',
+  store: store
 }))
 
-app.set('view engine', 'pug')
-app.set('views', './views/pug')
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
 
 
 myDB(async client => {
