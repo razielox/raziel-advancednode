@@ -8,6 +8,8 @@ const passport = require('passport')
 const app = express();
 const routes = require('./routes')
 const auth = require('./auth')
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
 require('https').globalAgent.options.rejectUnauthorized = false;
 
 fccTesting(app); //For FCC testing purposes
@@ -29,6 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 
 
 myDB(async client => {
+  io.on('connection', socket => {
+    console.log('A user has connected')
+  })
   const myDataBase = await client.db('database').collection('users')
 
   auth(app, myDataBase)
@@ -44,6 +49,6 @@ myDB(async client => {
 })
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log('Listening on port ' + PORT);
 });
