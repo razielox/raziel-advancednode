@@ -10,7 +10,6 @@ const routes = require('./routes')
 const auth = require('./auth')
 const http = require('http').createServer(app)
 const io = require('socket.io')(http)
-require('https').globalAgent.options.rejectUnauthorized = false;
 
 fccTesting(app); //For FCC testing purposes
 
