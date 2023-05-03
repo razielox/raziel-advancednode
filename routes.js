@@ -15,7 +15,7 @@ app.route('/login').post(passport.authenticate('local', {failureRedirect:'/'}),(
 
   app.route('/profile').get(ensureAuthenticated,(request, response) => {
     
-    console.log(request.user)
+    //console.log(request.user)
     response.render('profile',{username: request.user.username})
   })
 
