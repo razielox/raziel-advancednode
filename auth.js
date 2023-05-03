@@ -3,7 +3,8 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcrypt')
 const {ObjectID} = require('mongodb')
 const GitHubStrategy = require('passport-github').Strategy
-
+const httpProxy = require('https-proxy-agent')
+const { default: HttpsProxyAgent } = require('https-proxy-agent/dist/agent')
 
 module.exports = async(app, myDataBase) => {
   
@@ -16,7 +17,7 @@ module.exports = async(app, myDataBase) => {
       done(null,doc)})
   })
   
-  passport.use(new GitHubStrategy({
+  const githubStrat = new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
@@ -39,7 +40,11 @@ module.exports = async(app, myDataBase) => {
             cb(err,user)
           }
       })
-    } ))
+    } )
+    const agent = new HttpsProxyAgent(process.env.HTTP_PROXY)
+    githubStrat._oauth2.setAgent(agent)
+    passport.use(githubStrat)
+
       passport.use(new LocalStrategy((username, password, done)=> {
         myDataBase.findOne({username: username}, (err, user) => {
           console.log(`User ${username} attemped to log in`)
