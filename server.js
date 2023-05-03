@@ -31,13 +31,16 @@ app.use(express.urlencoded({ extended: true }));
 
 
 myDB(async client => {
-  io.on('connection', socket => {
-    console.log('A user has connected')
-  })
   const myDataBase = await client.db('database').collection('users')
-
+  
   auth(app, myDataBase)
   routes(app, myDataBase)
+  let currentUsers = 0
+  io.on('connection', socket => {
+    ++currentUsers
+    io.emit('user count', currentUsers)
+    console.log('A user has connected')
+  })
   
   app.use((request, response,next) => {
     response.status(404).type('text').send('Not Found')

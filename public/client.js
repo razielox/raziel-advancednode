@@ -1,9 +1,6 @@
 $(document).ready(function () {
   /* global io */
   let socket = io()
-  let currentUsers = 0
-  ++currentUsers
-  io.emit('user cout', currentUsers)
   socket.on('user count', (data) => {
     console.log(data)
   })
