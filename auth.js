@@ -22,10 +22,9 @@ module.exports = async(app, myDataBase) => {
     callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
-      console.log(profile, accessToken)
       myDataBase.findOne({id: profile.id}, (err, user) => {
         if(user) {
-          return cb(err,user)
+          cb(err,user)
         } else {
           myDataBase.insertOne({
             id: profile.id, 
@@ -35,9 +34,10 @@ module.exports = async(app, myDataBase) => {
             email: Array.isArray(profile.emails) ? profile.emails[0].value : 'No public email',
             created_on: new Date(),
             provider: profile.provider || ''})
-          
-          return cb(err,user)
-        }
+            
+            console.log(profile, accessToken)
+            cb(err,user)
+          }
       })
     } ))
       passport.use(new LocalStrategy((username, password, done)=> {
