@@ -14,9 +14,23 @@ module.exports = async(app, myDataBase) => {
   
   passport.deserializeUser((id, done) => {
     myDataBase.findOne({_id: new ObjectID(id)}, (err, doc) => {
+      if (err) {
+        return console.error(err)
+      }
       done(null,doc)})
   })
   
+  passport.use(new LocalStrategy((username, password, done)=> {
+    myDataBase.findOne({username: username}, (err, user) => {
+      console.log(`User ${username} attemped to log in`)
+      console.log(err, user)
+      if(!user) return done(null, false)
+      //if(password) return done(null, user)
+      if(!bcrypt.compareSync(password, user.password)) return done(null, false)
+      console.log(bcrypt.compareSync(password, user.password))
+      return done(null, user)
+    })
+  }))
   const githubStrat = new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
@@ -41,19 +55,7 @@ module.exports = async(app, myDataBase) => {
           }
       })
     } )
-    const agent = new HttpsProxyAgent(process.env.HTTP_PROXY)
-    githubStrat._oauth2.setAgent(agent)
+
     passport.use(githubStrat)
 
-      passport.use(new LocalStrategy((username, password, done)=> {
-        myDataBase.findOne({username: username}, (err, user) => {
-          console.log(`User ${username} attemped to log in`)
-          console.log(err, user)
-          if(!user) return done(null, false)
-          //if(password) return done(null, user)
-          if(!bcrypt.compareSync(password, user.password)) return done(null, false)
-          console.log(bcrypt.compareSync(password, user.password))
-          return done(null, user)
-        })
-      }))
 }
