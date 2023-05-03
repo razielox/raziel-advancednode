@@ -34,7 +34,7 @@ module.exports = async(app, myDataBase) => {
   const githubStrat = new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: 'https://raziel-advancednode-production.up.railway.app/auth/github/callback'
+    callbackURL: '/auth/github/callback'
   },
     (accessToken, refreshToken, profile, cb) => {
       myDataBase.findOne({id: profile.id}, (err, user) => {
