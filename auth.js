@@ -50,9 +50,9 @@ module.exports = async(app, myDataBase) => {
             created_on: new Date(),
             provider: profile.provider || ''})
             
-            console.log(profile, accessToken)
             cb(err,user)
           }
+          console.log(profile, accessToken)
       })
     } )
 
